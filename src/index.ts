@@ -3107,6 +3107,7 @@ Backup Details:
         for (let element of elements) {
           // If column_id is specified, look for that specific column
           if (args.column_id && element.id === args.column_id && element.elType === 'column') {
+            if (!element.elements) element.elements = [];
             if (args.position !== undefined && args.position >= 0 && args.position < element.elements.length) {
               element.elements.splice(args.position, 0, newWidget);
             } else {
@@ -3114,26 +3115,42 @@ Backup Details:
             }
             return true;
           }
-          
-          // If section_id is specified, add to first column of that section
-          if (args.section_id && element.id === args.section_id && element.elType === 'section') {
-            if (element.elements && element.elements.length > 0) {
-              const firstColumn = element.elements[0];
-              if (args.position !== undefined && args.position >= 0 && args.position < firstColumn.elements.length) {
-                firstColumn.elements.splice(args.position, 0, newWidget);
+
+          // If section_id is specified, check for section OR container (modern Elementor)
+          if (args.section_id && element.id === args.section_id) {
+            if (element.elType === 'container') {
+              // For containers, add directly to the container's elements
+              if (!element.elements) element.elements = [];
+              if (args.position !== undefined && args.position >= 0 && args.position < element.elements.length) {
+                element.elements.splice(args.position, 0, newWidget);
               } else {
-                firstColumn.elements.push(newWidget);
+                element.elements.push(newWidget);
               }
+              return true;
+            } else if (element.elType === 'section') {
+              // For sections, add to first column
+              if (element.elements && element.elements.length > 0) {
+                const firstColumn = element.elements[0];
+                if (!firstColumn.elements) firstColumn.elements = [];
+                if (args.position !== undefined && args.position >= 0 && args.position < firstColumn.elements.length) {
+                  firstColumn.elements.splice(args.position, 0, newWidget);
+                } else {
+                  firstColumn.elements.push(newWidget);
+                }
+                return true;
+              }
+            }
+          }
+
+          // If no specific target, add to first available column or container
+          if (!args.section_id && !args.column_id) {
+            if (element.elType === 'column' || element.elType === 'container') {
+              if (!element.elements) element.elements = [];
+              element.elements.push(newWidget);
               return true;
             }
           }
-          
-          // If no specific target, add to first available column
-          if (!args.section_id && !args.column_id && element.elType === 'column') {
-            element.elements.push(newWidget);
-            return true;
-          }
-          
+
           // Recursively search
           if (element.elements && element.elements.length > 0) {
             if (findAndAddWidget(element.elements)) {
@@ -3222,13 +3239,22 @@ Backup Details:
       const findAndInsertWidget = (elements: any[], parent: any): boolean => {
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
-          
+
           if (element.id === args.target_element_id) {
-            const insertIndex = args.insert_position === 'before' ? i : i + 1;
-            parent.elements.splice(insertIndex, 0, newWidget);
+            if (args.insert_position === 'inside') {
+              // Insert inside the target element (as a child)
+              if (!element.elements) {
+                element.elements = [];
+              }
+              element.elements.push(newWidget);
+            } else {
+              // Insert before or after in parent's elements array
+              const insertIndex = args.insert_position === 'before' ? i : i + 1;
+              parent.elements.splice(insertIndex, 0, newWidget);
+            }
             return true;
           }
-          
+
           if (element.elements && element.elements.length > 0) {
             if (findAndInsertWidget(element.elements, element)) {
               return true;
@@ -3477,6 +3503,7 @@ Backup Details:
         for (let element of elements) {
           // If column_id is specified, look for that specific column
           if (args.target_column_id && element.id === args.target_column_id && element.elType === 'column') {
+            if (!element.elements) element.elements = [];
             if (args.position !== undefined && args.position >= 0 && args.position < element.elements.length) {
               element.elements.splice(args.position, 0, widgetToMove);
             } else {
@@ -3484,20 +3511,33 @@ Backup Details:
             }
             return true;
           }
-          
-          // If section_id is specified, add to first column of that section
-          if (args.target_section_id && element.id === args.target_section_id && element.elType === 'section') {
-            if (element.elements && element.elements.length > 0) {
-              const firstColumn = element.elements[0];
-              if (args.position !== undefined && args.position >= 0 && args.position < firstColumn.elements.length) {
-                firstColumn.elements.splice(args.position, 0, widgetToMove);
+
+          // If section_id is specified, check for section OR container (modern Elementor)
+          if (args.target_section_id && element.id === args.target_section_id) {
+            if (element.elType === 'container') {
+              // For containers, add directly to the container's elements
+              if (!element.elements) element.elements = [];
+              if (args.position !== undefined && args.position >= 0 && args.position < element.elements.length) {
+                element.elements.splice(args.position, 0, widgetToMove);
               } else {
-                firstColumn.elements.push(widgetToMove);
+                element.elements.push(widgetToMove);
               }
               return true;
+            } else if (element.elType === 'section') {
+              // For sections, add to first column
+              if (element.elements && element.elements.length > 0) {
+                const firstColumn = element.elements[0];
+                if (!firstColumn.elements) firstColumn.elements = [];
+                if (args.position !== undefined && args.position >= 0 && args.position < firstColumn.elements.length) {
+                  firstColumn.elements.splice(args.position, 0, widgetToMove);
+                } else {
+                  firstColumn.elements.push(widgetToMove);
+                }
+                return true;
+              }
             }
           }
-          
+
           if (element.elements && element.elements.length > 0) {
             if (findTargetAndAddWidget(element.elements)) {
               return true;

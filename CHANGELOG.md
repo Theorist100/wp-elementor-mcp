@@ -2,6 +2,43 @@
 
 All notable changes to the WordPress Elementor MCP Server will be documented in this file.
 
+## [1.6.2] - 2025-12-24 (Fork: Theorist100)
+
+### 🛠️ Fixed
+
+#### Container Support for Widget Operations
+Modern Elementor uses `container` type instead of legacy `section`/`column`. Three functions were not handling containers properly:
+
+- **`insert_widget_at_position`**: Added `inside` position support to properly nest widgets inside containers. Previously, `inside` was treated same as `after`, inserting widget as sibling instead of child.
+
+- **`move_widget`**: Added `container` type detection. Previously only looked for `section` and `column` types, causing "Target container not found" errors with modern Elementor pages.
+
+- **`add_widget_to_section`**: Added `container` type detection. Same issue as `move_widget`.
+
+#### JSON Parsing Error in Elementor Data Consumer Methods
+- The `getElementorData` method returns formatted text with debug info followed by JSON after "--- Elementor Data ---" separator
+- Multiple methods were parsing entire response as JSON, causing "Unexpected token 'F'" errors when text started with "Found as page..."
+- Added `extractElementorJsonFromText()` helper to properly extract JSON portion
+- Updated 14 affected methods to use the new helper
+
+**Affected methods:**
+- getElementorElements
+- getElementorDataChunked
+- getPageStructure
+- createElementorSection
+- addColumnToSection
+- duplicateSection
+- addWidgetToSection
+- insertWidgetAtPosition
+- cloneWidget
+- moveWidget
+- deleteElementorElement
+- reorderElements
+- copyElementSettings
+- findElementsByType
+
+---
+
 ## [1.6.1] - 2024-01-XX
 
 ### ✨ Added
