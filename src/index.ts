@@ -894,6 +894,27 @@ class ElementorWordPressMCP {
             },
           },
           {
+            name: 'reorder_top_level_sections',
+            description: 'Reorder top-level sections/containers on a page. Use this to change the order of main page sections.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                post_id: {
+                  type: 'number',
+                  description: 'Post/Page ID',
+                },
+                section_ids: {
+                  type: 'array',
+                  description: 'Array of top-level section/container IDs in desired order',
+                  items: {
+                    type: 'string',
+                  },
+                },
+              },
+              required: ['post_id', 'section_ids'],
+            },
+          },
+          {
             name: 'copy_element_settings',
             description: 'Copy settings from one element to another',
             inputSchema: {
@@ -1078,6 +1099,8 @@ class ElementorWordPressMCP {
             return await this.deleteElementorElement(args as any);
           case 'reorder_elements':
             return await this.reorderElements(args as any);
+          case 'reorder_top_level_sections':
+            return await this.reorderTopLevelSections(args as any);
           case 'copy_element_settings':
             return await this.copyElementSettings(args as any);
           // Template Management
@@ -3752,6 +3775,85 @@ Backup Details:
       throw new McpError(
         ErrorCode.InvalidRequest,
         `Failed to reorder elements: ${error.message}`
+      );
+    }
+  }
+
+  private async reorderTopLevelSections(args: { post_id: number; section_ids: string[] }) {
+    this.ensureAuthenticated();
+
+    try {
+      // Get current Elementor data
+      const currentElementorData = await this.getElementorData({ post_id: args.post_id });
+      const currentDataText = currentElementorData.content[0].text;
+
+      if (currentDataText.includes('No Elementor data found')) {
+        throw new McpError(
+          ErrorCode.InvalidRequest,
+          `No Elementor data found for post/page ID ${args.post_id}`
+        );
+      }
+
+      let elementorData: any[];
+      try {
+        elementorData = this.extractElementorJsonFromText(currentDataText);
+      } catch (parseError) {
+        throw new McpError(
+          ErrorCode.InvalidRequest,
+          `Failed to parse current Elementor data: ${parseError}`
+        );
+      }
+
+      // Get current top-level section IDs
+      const currentIds = elementorData.map(el => el.id);
+
+      // Validate that all provided IDs exist
+      for (const id of args.section_ids) {
+        if (!currentIds.includes(id)) {
+          throw new McpError(
+            ErrorCode.InvalidRequest,
+            `Section ID ${id} not found in top-level elements. Available IDs: ${currentIds.join(', ')}`
+          );
+        }
+      }
+
+      // Reorder: first add sections in the specified order
+      const newElementorData: any[] = [];
+      for (const sectionId of args.section_ids) {
+        const section = elementorData.find(el => el.id === sectionId);
+        if (section) {
+          newElementorData.push(section);
+        }
+      }
+
+      // Then add any sections that weren't in the reorder list (preserve them at the end)
+      for (const section of elementorData) {
+        if (!args.section_ids.includes(section.id)) {
+          newElementorData.push(section);
+        }
+      }
+
+      // Update the page
+      await this.updateElementorData({
+        post_id: args.post_id,
+        elementor_data: JSON.stringify(newElementorData)
+      });
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Top-level sections reordered successfully!\nNew order: ${newElementorData.map(el => el.id).join(', ')}`,
+          },
+        ],
+      };
+    } catch (error: any) {
+      if (error instanceof McpError) {
+        throw error;
+      }
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        `Failed to reorder top-level sections: ${error.message}`
       );
     }
   }

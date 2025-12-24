@@ -190,7 +190,8 @@ ELEMENTOR_ENABLE_PERFORMANCE=true
 
 **Element Operations:**
 - `delete_elementor_element` - Remove elements safely
-- `reorder_elements` - Change element order
+- `reorder_elements` - Change element order within a container
+- `reorder_top_level_sections` - Reorder main page sections/containers
 - `copy_element_settings` - Copy settings between elements
 
 **Page Analysis:**

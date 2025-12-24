@@ -4,6 +4,10 @@ All notable changes to the WordPress Elementor MCP Server will be documented in 
 
 ## [1.6.2] - 2025-12-24 (Fork: Theorist100)
 
+### ✨ Added
+
+- **New Tool**: `reorder_top_level_sections` - Reorder main page sections/containers by providing an array of section IDs in desired order. Useful for reorganizing page layout without manually moving each section.
+
 ### 🛠️ Fixed
 
 #### Container Support for Widget Operations
