@@ -119,6 +119,25 @@ class ElementorWordPressMCP {
     }
   }
 
+  /**
+   * Extracts JSON data from getElementorData response text.
+   * The response format is: debug info + "--- Elementor Data ---\n" + JSON
+   */
+  private extractElementorJsonFromText(text: string): any[] {
+    const separator = '--- Elementor Data ---\n';
+    const separatorIndex = text.indexOf(separator);
+
+    if (separatorIndex === -1) {
+      throw new McpError(
+        ErrorCode.InvalidRequest,
+        'Could not find Elementor data separator in response'
+      );
+    }
+
+    const jsonPart = text.substring(separatorIndex + separator.length);
+    return JSON.parse(jsonPart);
+  }
+
   private setupToolHandlers() {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       const tools: any[] = [];
@@ -2021,10 +2040,10 @@ Visit the page to confirm changes are visible. If not, the cache clearing was in
         );
       }
       
-      // Parse current data
+      // Parse current data - extract JSON from the formatted response
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -2163,10 +2182,10 @@ Visit the page to confirm changes are visible. If not, the cache clearing was in
         );
       }
       
-      // Parse current data
+      // Parse current data - extract JSON from the formatted response
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -2234,10 +2253,10 @@ Visit the page to confirm changes are visible. If not, the cache clearing was in
         );
       }
       
-      // Parse current data
+      // Parse current data - extract JSON from the formatted response
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -2322,10 +2341,10 @@ Visit the page to confirm changes are visible. If not, the cache clearing was in
         );
       }
       
-      // Parse current data
+      // Parse current data - extract JSON from the formatted response
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -2495,10 +2514,10 @@ Visit the page to confirm changes are visible. If not, the cache clearing was in
         );
       }
       
-      // Parse current data
+      // Parse current data - extract JSON from the formatted response
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -2735,7 +2754,7 @@ Backup Details:
       let elementorData: any[] = [];
       if (!currentDataText.includes('No Elementor data found')) {
         try {
-          elementorData = JSON.parse(currentDataText);
+          elementorData = this.extractElementorJsonFromText(currentDataText);
         } catch (parseError) {
           elementorData = [];
         }
@@ -2815,7 +2834,7 @@ Backup Details:
       let elementorData: any[] = [];
       if (!currentDataText.includes('No Elementor data found')) {
         try {
-          elementorData = JSON.parse(currentDataText);
+          elementorData = this.extractElementorJsonFromText(currentDataText);
         } catch (parseError) {
           elementorData = [];
         }
@@ -2887,7 +2906,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -2977,7 +2996,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3060,7 +3079,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3176,7 +3195,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3272,7 +3291,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3417,7 +3436,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3538,7 +3557,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3618,7 +3637,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3714,7 +3733,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3818,7 +3837,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
@@ -3914,7 +3933,7 @@ Backup Details:
       
       let elementorData: any[];
       try {
-        elementorData = JSON.parse(currentDataText);
+        elementorData = this.extractElementorJsonFromText(currentDataText);
       } catch (parseError) {
         throw new McpError(
           ErrorCode.InvalidRequest,
