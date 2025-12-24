@@ -305,6 +305,53 @@ npm run test:all               # Complete test suite
 └── test-simple.js           # Configuration testing
 ```
 
+## 🧠 Context-Efficient Workflow
+
+Working with large Elementor pages? The full JSON can be 200KB+, filling up your AI context window. Use these lightweight tools instead:
+
+### Step-by-Step Approach
+
+```javascript
+// ❌ BAD: Loads entire page (huge JSON)
+get_elementor_data(post_id=123)  // → 200KB+ 😱
+
+// ✅ GOOD: Step-by-step approach
+// 1. Get overview (IDs + types only)
+get_elementor_elements(post_id=123)
+// → [{id: "abc", type: "widget", widgetType: "heading"}, ...] ~5KB
+
+// 2. Find specific widget types
+find_elements_by_type(post_id=123, widget_type="heading")
+// → [{id: "abc", widgetType: "heading"}, ...] ~2KB
+
+// 3. Get details of ONE widget
+get_elementor_widget(post_id=123, widget_id="abc")
+// → {id: "abc", settings: {...}} ~3KB
+
+// 4. Update that specific widget
+update_elementor_widget(post_id=123, widget_id="abc", widget_settings={...})
+```
+
+### Tool Comparison
+
+| Tool | Returns | Size | Use Case |
+|------|---------|------|----------|
+| `get_elementor_elements` | IDs + types | ~5KB | Page overview |
+| `find_elements_by_type` | Filtered list | ~2KB | Find headings, buttons, etc. |
+| `get_elementor_widget` | Single widget | ~3KB | Get widget details |
+| `get_page_structure` | Simplified tree | ~10KB | Understand layout |
+| `get_elementor_data_chunked` | Partial data | Configurable | Large pages |
+| `get_elementor_data` | Everything | 50-200KB+ | Avoid for large pages |
+
+### Pro Tips
+
+- **Start small**: Always begin with `get_elementor_elements` to understand the page
+- **Filter first**: Use `find_elements_by_type` to narrow down before fetching details
+- **Update surgically**: Use `update_elementor_widget` for single widget changes
+- **Chunk if needed**: `get_elementor_data_chunked(chunk_size=3)` for large pages
+
+---
+
 ## ⚡ Performance Features
 
 ### Smart Data Handling
